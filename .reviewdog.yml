@@ -1,0 +1,28 @@
+runner:
+  # https://golang.org/cmd/vet/
+  govet:
+    cmd: go vet $(go list ./...)
+
+  # https://github.com/golang/lint
+  golint:
+    cmd: golint $(go list ./...)
+    errorformat:
+    - "%f:%l:%c: %m"
+
+  # https://github.com/client9/misspell
+  misspell:
+    cmd: misspell .
+    errorformat:
+    - "%f:%l:%c: %m"
+
+  # https://github.com/kisielk/errcheck
+  errcheck:
+    cmd: errcheck -exclude .errcheck_excludes  -ignore 'fmt:.*,io:.*,ioutil:.*,net/http:.*' -ignoretests $(go list ./...)
+    errorformat:
+    - "%f:%l:%c:%m"
+
+  # https://staticcheck.io/docs/staticcheck
+  staticcheck:
+    cmd: staticcheck $(go list ./...)
+    errorformat:
+    - "%f:%l:%c: %m"

@@ -29,7 +29,7 @@ https://www.mercari.com/cla/
 ### Setup environment & Run tests
 
 * requirements
-    * Go version must be at least 1.11 (Modules)
+    * Go version must be at least 1.12 (Modules)
 
 1. Testing in local
 

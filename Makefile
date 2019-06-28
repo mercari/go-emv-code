@@ -1,6 +1,6 @@
 export GO111MODULE = on
 
-REPOSITORY = github.com/mercari/go-emv-code
+REPOSITORY = go.mercari.io/go-emv-code
 PACKAGES = $(shell go list ./...)
 
 GO_TEST ?= go test

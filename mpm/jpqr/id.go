@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mercari/go-emv-code/mpm"
-	"github.com/mercari/go-emv-code/tlv"
+	"go.mercari.io/go-emv-code/mpm"
+	"go.mercari.io/go-emv-code/tlv"
 )
 
 const (

@@ -1,4 +1,4 @@
-module github.com/mercari/go-emv-code
+module go.mercari.io/go-emv-code
 
 go 1.12
 

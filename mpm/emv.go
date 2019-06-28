@@ -12,8 +12,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/mercari/go-emv-code/crc16"
-	"github.com/mercari/go-emv-code/tlv"
+	"go.mercari.io/go-emv-code/crc16"
+	"go.mercari.io/go-emv-code/tlv"
 )
 
 // Code represents EMV Payment Code payload structure.

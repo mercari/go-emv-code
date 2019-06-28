@@ -9,11 +9,33 @@ executors:
     shell: /bin/bash -eu -o pipefail
     working_directory: /go/src/go.mercari.io/mercari/go-emv-code
 
+commands:
+  gomod:
+    description: Run `go mod download` and `go mod vendor`.
+    steps:
+    - restore_cache:
+        name: Restore go modules cache
+        keys:
+          - gomod-v1-{{ checksum "go.sum" }}
+    - run:
+        name: Download go module dependencies
+        command: |
+          go mod download
+    - save_cache:
+        name: Save go modules cache
+        key: gomod-v1-{{ checksum "go.sum" }}
+        paths: /go/pkg/mod
+    - run:
+        name: Run go mod vendor
+        command: |
+          go mod vendor -v
+
 jobs:
   test:
     executor: golang-stretch
     steps:
     - checkout
+    - gomod
     - run:
         name: Run test
         command: |
@@ -23,6 +45,7 @@ jobs:
     executor: golang-stretch
     steps:
     - checkout
+    - gomod
     - run:
         name: Run test and collect coverages
         command: |
@@ -36,6 +59,7 @@ jobs:
     executor: golang-stretch
     steps:
     - checkout
+    - gomod
     - run:
         name: Run reviewdog
         command: |

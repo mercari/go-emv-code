@@ -3,7 +3,7 @@ version: 2
 defaults: &defaults
   docker:
   - image: golang:1.12-stretch
-  working_directory: /go/src/github.com/mercari/go-emv-code
+  working_directory: /go/src/go.mercari.io/go-emv-code
 
 jobs:
   test:

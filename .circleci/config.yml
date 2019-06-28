@@ -33,6 +33,7 @@ commands:
 jobs:
   test:
     executor: golang-stretch
+    parallelism: 4
     steps:
     - checkout
     - gomod

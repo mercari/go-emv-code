@@ -4,16 +4,16 @@
 [circleci-badge]: https://circleci.com/gh/mercari/go-emv-code/tree/master.svg?style=svg
 [codecov]: https://codecov.io/gh/mercari/go-emv-code
 [codecov-badge]: https://codecov.io/gh/mercari/go-emv-code/branch/master/graph/badge.svg
-[godoc]: https://godoc.org/github.com/mercari/go-emv-code
-[godoc-badge]: https://godoc.org/github.com/mercari/go-emv-code?status.svg
-[goreport]: https://goreportcard.com/report/github.com/mercari/go-emv-code
-[goreport-badge]: https://goreportcard.com/badge/github.com/mercari/go-emv-code
+[godoc]: https://godoc.org/go.mercari.io/go-emv-code
+[godoc-badge]: https://godoc.org/go.mercari.io/go-emv-code?status.svg
+[goreport]: https://goreportcard.com/report/go.mercari.io/go-emv-code
+[goreport-badge]: https://goreportcard.com/badge/go.mercari.io/go-emv-code
 
 go-emv-code is a Encoder/Decoder implementation for generate EMV<sup>®</sup><sup>[1](#1)</sup> compliant QR Code<sup>[2](#2)</sup> in Go.
 
 ## Usage
 
-See [example](https://godoc.org/github.com/mercari/go-emv-code/mpm/#pkg-examples).
+See [example](https://godoc.org/go.mercari.io/go-emv-code/mpm/#pkg-examples).
 
 ## TODO
 

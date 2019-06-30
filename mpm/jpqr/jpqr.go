@@ -6,7 +6,7 @@ package jpqr
 import (
 	"fmt"
 
-	"github.com/mercari/go-emv-code/mpm"
+	"go.mercari.io/go-emv-code/mpm"
 )
 
 // Decode decodes payload and validates as JPQR.

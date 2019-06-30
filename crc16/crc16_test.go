@@ -3,7 +3,7 @@ package crc16_test
 import (
 	"testing"
 
-	"github.com/mercari/go-emv-code/crc16"
+	"go.mercari.io/go-emv-code/crc16"
 )
 
 // TestChecksumCCITTFalse tests the generic algorithm.

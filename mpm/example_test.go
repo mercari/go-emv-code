@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/mercari/go-emv-code/mpm"
+	"go.mercari.io/go-emv-code/mpm"
 )
 
 func ExampleDecode() {

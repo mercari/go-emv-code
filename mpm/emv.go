@@ -1,6 +1,3 @@
-/*
-Package mpm implements encoding and decoding of EMV as defined in EMV Payment Code.
-*/
 package mpm
 
 import (
@@ -12,8 +9,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/mercari/go-emv-code/crc16"
-	"github.com/mercari/go-emv-code/tlv"
+	"go.mercari.io/go-emv-code/crc16"
+	"go.mercari.io/go-emv-code/tlv"
 )
 
 // Code represents EMV Payment Code payload structure.

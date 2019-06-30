@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mercari/go-emv-code/tlv"
+	"go.mercari.io/go-emv-code/tlv"
 )
 
 // NullMerchantInformation represents Data Objects for Merchant Information—Language Template.

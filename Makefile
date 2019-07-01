@@ -1,7 +1,10 @@
 export GO111MODULE = on
 
 REPOSITORY = go.mercari.io/go-emv-code
-PACKAGES = $(shell go list ./...)
+PACKAGES ?= $(shell go list ./...)
+ifneq ($(CIRCLECI),)
+	PACKAGES=$(shell go list ./... | circleci tests split)
+endif
 
 GO_TEST ?= go test
 GO_TEST_TARGET ?= .
@@ -16,15 +19,15 @@ all: test
 .PHONY: bootstrap-lint-tools
 bootstrap-lint-tools:
 	@echo "Installing/Updating tools (dir: $(GOBIN), tools: $(LINT_TOOLS))"
-	@go install -tags tools $(LINT_TOOLS)
+	@go install -tags tools -mod=readonly $(LINT_TOOLS)
 
 .PHONY: test
 test:  ## Run go test
-	${GO_TEST} -v -race -run=$(GO_TEST_TARGET) $(PACKAGES)
+	${GO_TEST} -v -race -mod=readonly -run=$(GO_TEST_TARGET) $(PACKAGES)
 
 .PHONY: coverage
 coverage:  ## Collect test coverage
-	${GO_TEST} -v -race -run=$(GO_TEST_TARGET) -covermode=atomic -coverpkg=${REPOSITORY}/... -coverprofile=$@.out $(PACKAGES)
+	${GO_TEST} -v -race -mod=readonly -run=$(GO_TEST_TARGET) -covermode=atomic -coverpkg=${REPOSITORY}/... -coverprofile=$@.out $(PACKAGES)
 
 .PHONY: reviewdog
 reviewdog: bootstrap-lint-tools  ## Run reviewdog

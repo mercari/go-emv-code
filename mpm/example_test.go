@@ -23,13 +23,11 @@ func ExampleDecode() {
 	buf, err := mpm.Encode(&c)
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 
 	dst, err := mpm.Decode(buf)
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 
 	fmt.Printf("%+v\n", dst)

@@ -34,13 +34,11 @@ func ExampleDecode() {
 	buf, err := jpqr.Encode(&c)
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 
 	dst, err := jpqr.Decode(buf)
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 
 	fmt.Printf("%+v\n", dst)

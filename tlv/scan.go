@@ -40,6 +40,9 @@ func scan(v reflect.Value, m map[string]int, token []rune, tagLength, lenLength 
 
 	if i, ok := m[string(tag)]; ok {
 		f := v.Field(i)
+		if !f.CanSet() {
+			return fmt.Errorf("field must have settability")
+		}
 
 		if isScannable(f.Type()) {
 			var res []reflect.Value

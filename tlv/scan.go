@@ -45,6 +45,10 @@ func scan(v reflect.Value, m map[string]int, token []rune, tagLength, lenLength 
 		}
 
 		if isScannable(f.Type()) {
+			if !f.CanAddr(){
+				return fmt.Errorf("field must have addressability")
+			}
+
 			var res []reflect.Value
 			if m, ok := reflect.PtrTo(f.Type()).MethodByName("Scan"); ok {
 				res = m.Func.Call([]reflect.Value{f.Addr(), reflect.ValueOf(val)})

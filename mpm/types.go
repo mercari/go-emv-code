@@ -15,6 +15,7 @@ type NullMerchantInformation struct {
 	Valid              bool
 }
 
+// Tokenize turns NullMerchantInformation into a string
 func (m *NullMerchantInformation) Tokenize() (string, error) {
 	if m == nil {
 		return "", nil
@@ -47,6 +48,7 @@ const (
 	PointOfInitiationMethodDynamic                         = "12"
 )
 
+// Tokenize turns PointOfInitiationMethod into a string
 func (p *PointOfInitiationMethod) Tokenize() (string, error) {
 	if p == nil {
 		return "", nil
@@ -72,6 +74,7 @@ type NullString struct {
 	Valid  bool
 }
 
+// Tokenize turns NullString into a string
 func (n *NullString) Tokenize() (string, error) {
 	if n == nil || !n.Valid {
 		return "", nil
@@ -97,6 +100,7 @@ const (
 	TipOrConvenienceIndicatorPercentage                           = "03"
 )
 
+// Tokenize turns TipOrConvenienceIndicator into a string
 func (t *TipOrConvenienceIndicator) Tokenize() (string, error) {
 	if t == nil {
 		return "", nil

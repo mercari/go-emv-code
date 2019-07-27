@@ -45,6 +45,7 @@ func TestChecksumCCITTFalse(t *testing.T) {
 		{"How can you write a big system without C++?  -Paul Glick", 0xCEEA},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run("", func(t *testing.T) {
 			if crc := crc16.ChecksumCCITTFalse([]byte(tt.in)); crc != tt.out {
 				t.Errorf("ChecksumCCITTFalse(%s) = 0x%x want 0x%x", tt.in, crc, tt.out)
@@ -78,7 +79,7 @@ func TestDigest_BlockSize(t *testing.T) {
 
 func TestDigest_Reset(t *testing.T) {
 
-	defer func(){
+	defer func() {
 		if r := recover(); r != nil {
 			t.Errorf("unexpected panic, catch: %+v", r)
 		}
@@ -135,6 +136,7 @@ func TestDigest_Sum16(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run("", func(t *testing.T) {
 			h := crc16.NewCCITTFalse()
 			_, err := h.Write([]byte(tt.in))

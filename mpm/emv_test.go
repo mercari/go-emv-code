@@ -141,6 +141,7 @@ func TestDecoder_Decode(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			dst, err := mpm.Decode(tt.args.buf)
 
@@ -247,6 +248,7 @@ func TestEncoder_Encode(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			buf, err := mpm.Encode(tt.args.in)
 

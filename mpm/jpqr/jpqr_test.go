@@ -67,6 +67,7 @@ func TestDecode(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := jpqr.Decode(tt.args.payload)
 			if (err != nil) != tt.wantErr {
@@ -169,6 +170,7 @@ func TestEncode(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := jpqr.Encode(tt.args.code)
 			if (err != nil) != tt.wantErr {

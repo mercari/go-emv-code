@@ -70,9 +70,8 @@ func (e *Encoder) Encode(src interface{}) error {
 			} else {
 				if e, ok := err.(error); ok {
 					return e
-				} else {
-					return errors.New("unexpected value returned")
 				}
+				return errors.New("unexpected value returned")
 			}
 		}
 

@@ -45,7 +45,7 @@ func scan(v reflect.Value, m map[string]int, token []rune, tagLength, lenLength 
 		}
 
 		if isScannable(f.Type()) {
-			if !f.CanAddr(){
+			if !f.CanAddr() {
 				return fmt.Errorf("field must have addressability")
 			}
 
@@ -59,12 +59,11 @@ func scan(v reflect.Value, m map[string]int, token []rune, tagLength, lenLength 
 			err := res[0].Interface()
 			if err == nil {
 				return nil
-			} else {
-				if e, ok := err.(error); ok {
-					return e
-				}
-				return fmt.Errorf("unexpected value returned id: %s", string(tag))
 			}
+			if e, ok := err.(error); ok {
+				return e
+			}
+			return fmt.Errorf("unexpected value returned id: %s", string(tag))
 		}
 
 		switch f.Kind() {

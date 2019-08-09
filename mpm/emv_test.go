@@ -1,7 +1,6 @@
 package mpm_test
 
 import (
-	"io"
 	"reflect"
 	"testing"
 
@@ -9,7 +8,7 @@ import (
 	"go.mercari.io/go-emv-code/tlv"
 )
 
-var emvSamplePayload = []byte("00020101021229300012D156000000000510A93FO3230Q31280012D15600000001030812345678520441115802CN5914BEST TRANSPORT6007BEIJING64200002ZH0104最佳运输0202北京540523.7253031565502016233030412340603***0708A60086670902ME91320016A0112233449988770708123456786304A13A")
+var emvSamplePayload = []byte("00020101021229300012D156000000000510A93FO3230Q31280012D15600000001030812345678520441115303156540523.725502015802CN5914BEST TRANSPORT6007BEIJING6233030412340603***0708A60086670902ME64200002ZH0104最佳运输0202北京6304CDE7")
 
 func TestDecoder_Decode(t *testing.T) {
 	type invalidFormat interface {
@@ -170,15 +169,11 @@ func BenchmarkDecode(b *testing.B) {
 }
 
 func TestEncoder_Encode(t *testing.T) {
-	type fields struct {
-		r *io.Writer
-	}
 	type args struct {
 		in *mpm.Code
 	}
 	tests := []struct {
 		name            string
-		fields          fields
 		args            args
 		want            []byte
 		wantErr         bool
@@ -240,7 +235,7 @@ func TestEncoder_Encode(t *testing.T) {
 					AdditionalDataFieldTemplate: "030412340603***0708A60086670902ME",
 				},
 			},
-			want: []byte("00020101021229300012D156000000000510A93FO3230Q31280012D15600000001030812345678520441115802CN5914BEST TRANSPORT6007BEIJING540523.7253031565502016233030412340603***0708A60086670902ME91320016A0112233449988770708123456786304FF8B"),
+			want: []byte("00020101021229300012D156000000000510A93FO3230Q31280012D15600000001030812345678520441115303156540523.725502015802CN5914BEST TRANSPORT6007BEIJING6233030412340603***0708A60086670902ME6304EBA6"),
 		},
 		{
 			name:    "err: cannot pass nil pointer",
@@ -261,18 +256,8 @@ func TestEncoder_Encode(t *testing.T) {
 			}
 
 			if tt.want != nil {
-				inDst, err := mpm.Decode(buf)
-				if err != nil {
-					t.Errorf("unexpected error = %v", err)
-				}
-
-				wantDst, err := mpm.Decode(tt.want)
-				if err != nil {
-					t.Errorf("unexpected error = %v", err)
-				}
-
-				if !reflect.DeepEqual(inDst, wantDst) {
-					t.Errorf("Encoder.Encode() = %v, want %v", inDst, wantDst)
+				if !reflect.DeepEqual(buf, tt.want) {
+					t.Errorf("Encoder.Encode() = %v, want %v", buf, tt.want)
 				}
 			}
 		})

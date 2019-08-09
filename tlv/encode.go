@@ -41,13 +41,16 @@ func (e *Encoder) Encode(src interface{}) error {
 		return errors.New("nil pointer passed")
 	}
 
-	indexes := tagIndexMap(v, e.tagName)
+	tags := tags(v, e.tagName)
 
 	v = reflect.Indirect(v)
-	for id, index := range indexes {
-		if _, ok := e.ignoreTags[id]; ok {
+	for _, tag := range tags {
+		if _, ok := e.ignoreTags[tag.id]; ok {
 			continue
 		}
+
+		id := tag.id
+		index := tag.index
 
 		f := v.Field(index)
 		if isTokenizable(f.Type()) {

@@ -114,6 +114,26 @@ func deref(t reflect.Type) reflect.Type {
 	return t
 }
 
+type tag struct {
+	id    string
+	index int
+}
+
+func tags(v reflect.Value, tagName string) []tag {
+	v = reflect.Indirect(v)
+	t := deref(v.Type())
+	m := make([]tag, 0, t.NumField())
+
+	for i := 0; i < t.NumField(); i++ {
+		f := t.Field(i)
+		if emvTag, ok := f.Tag.Lookup(tagName); ok {
+			m = append(m, tag{emvTag, i})
+		}
+	}
+
+	return m
+}
+
 func tagIndexMap(v reflect.Value, tagName string) map[string]int {
 	v = reflect.Indirect(v)
 	t := deref(v.Type())

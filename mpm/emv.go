@@ -97,7 +97,12 @@ func Decode(payload []byte, vfs ...ValidatorFunc) (*Code, error) {
 		return nil, err
 	}
 
-	vfs = append(vfs, validateMerchantInformation)
+	vfs = append(
+		vfs,
+		validateMerchantName,
+		validateMerchantCity,
+		validateMerchantInformation,
+	)
 	for _, f := range vfs {
 		if err := f(&c); err != nil {
 			return nil, err
@@ -154,6 +159,20 @@ func Encode(c *Code, vfs ...ValidatorFunc) ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
+}
+
+func validateMerchantName(c *Code) error {
+	if c.MerchantName == "" || 25 < utf8.RuneCountInString(c.MerchantName) {
+		return NewInvalidFormat("mpm: length of MerchantName should be between 1 and 25")
+	}
+	return nil
+}
+
+func validateMerchantCity(c *Code) error {
+	if c.MerchantCity == "" || 15 < utf8.RuneCountInString(c.MerchantCity) {
+		return NewInvalidFormat("mpm: length of MerchantCity should be between 1 and 15")
+	}
+	return nil
 }
 
 func validateMerchantInformation(c *Code) error {

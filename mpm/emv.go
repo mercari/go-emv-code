@@ -62,10 +62,27 @@ const (
 	unreservedTemplatesTagName = "UnreservedTemplates"
 )
 
+func chainTagLengthTranslators(f ...func(srcTagName, srcLength []rune) ([]rune, []rune)) tlv.TagLengthTranslator {
+	return tlv.TagLengthTranslatorFunc(func(tagName, length []rune) ([]rune, []rune) {
+		for _, f := range f {
+			tagName, length = f(tagName, length)
+		}
+		return tagName, length
+	})
+}
+
 func merchantAccountInformation(tag, length []rune) ([]rune, []rune) {
 	id, _ := strconv.Atoi(string(tag))
 	if (id >= merchantAccountInformationIDFrom) && (id <= merchantAccountInformationIDTo) {
 		return []rune(merchantAccountInformationTagName), length
+	}
+	return tag, length
+}
+
+func unreservedTemplates(tag, length []rune) ([]rune, []rune) {
+	id, _ := strconv.Atoi(string(tag))
+	if (id >= unreservedTemplatesIDFrom) && (id <= unreservedTemplatesIDTo) {
+		return []rune(unreservedTemplatesTagName), length
 	}
 	return tag, length
 }
@@ -94,7 +111,11 @@ func Decode(payload []byte, vfs ...ValidatorFunc) (*Code, error) {
 	}
 
 	var c Code
-	if err := tlv.NewDecoder(bytes.NewReader(payload), tagName, MaxSize, tagLength, lenLength, tlv.TagLengthTranslatorFunc(merchantAccountInformation)).Decode(&c); err != nil {
+	translatorFunc := chainTagLengthTranslators(
+		merchantAccountInformation,
+		unreservedTemplates,
+	)
+	if err := tlv.NewDecoder(bytes.NewReader(payload), tagName, MaxSize, tagLength, lenLength, translatorFunc).Decode(&c); err != nil {
 		switch e := err.(type) {
 		case *tlv.MalformedPayloadError:
 			return nil, NewInvalidFormat(fmt.Sprintf("mpm: %s", e.Error()))

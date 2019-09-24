@@ -31,6 +31,7 @@ type Code struct {
 	AdditionalDataFieldTemplate     string                    `emv:"62"`
 	// CRC                             string  `emv:"63"` // The last object under the root. But useless for value.
 	MerchantInformation NullMerchantInformation `emv:"64"`
+	UnreservedTemplates []tlv.TLV               `emv:"UnreservedTemplates"`
 }
 
 const (
@@ -55,6 +56,10 @@ const (
 	merchantAccountInformationIDFrom  = 2
 	merchantAccountInformationIDTo    = 51
 	merchantAccountInformationTagName = "MerchantAccountInformation"
+
+	unreservedTemplatesIDFrom  = 80
+	unreservedTemplatesIDTo    = 99
+	unreservedTemplatesTagName = "UnreservedTemplates"
 )
 
 func merchantAccountInformation(tag, length []rune) ([]rune, []rune) {
@@ -102,6 +107,7 @@ func Decode(payload []byte, vfs ...ValidatorFunc) (*Code, error) {
 		validateMerchantName,
 		validateMerchantCity,
 		validateMerchantInformation,
+		validateUnreservedTemplates,
 	)
 	for _, f := range vfs {
 		if err := f(&c); err != nil {
@@ -187,6 +193,24 @@ func validateMerchantInformation(c *Code) error {
 	}
 	if 15 < utf8.RuneCountInString(c.MerchantInformation.City) {
 		return NewInvalidFormat("mpm: length of MerchantInformation.City should be less than 15")
+	}
+	return nil
+}
+
+func validateUnreservedTemplates(c *Code) error {
+	if len(c.UnreservedTemplates) == 0 {
+		return nil
+	}
+	var v struct {
+		GloballyUniqueIdentifier string `emv:"00"`
+	}
+	for _, t := range c.UnreservedTemplates {
+		if err := tlv.NewDecoder(strings.NewReader(t.Value), "emv", MaxSize, 2, 2, nil).Decode(&v); err != nil {
+			return NewInvalidFormat("mpm: value of UnreservedTemplates should be a valid TLV")
+		}
+		if c.MerchantCity == "" || 32 < utf8.RuneCountInString(c.MerchantCity) {
+			return NewInvalidFormat("mpm: length of Globally Unique Identifier of UnreservedTemplates should be between 1 and 32")
+		}
 	}
 	return nil
 }

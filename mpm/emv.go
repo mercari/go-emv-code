@@ -147,13 +147,25 @@ func merchantAccountInformationTagLengthTranslator(tag, length []rune) ([]rune, 
 	return tag, length
 }
 
+func unreservedTemplatesTagLengthTranslator(tag, length []rune) ([]rune, []rune) {
+	if string(tag) == unreservedTemplatesTagName {
+		tag = []rune{}
+		length = []rune{}
+	}
+	return tag, length
+}
+
 // Encode encodes to EMV Payment Code payload.
 func Encode(c *Code, vfs ...ValidatorFunc) ([]byte, error) {
 	if c == nil {
 		return nil, errors.New("mpm: nil is not allowed")
 	}
 
-	vfs = append(vfs, validateMerchantInformation)
+	vfs = append(
+		vfs,
+		validateMerchantInformation,
+		validateUnreservedTemplates,
+	)
 	for _, f := range vfs {
 		if err := f(c); err != nil {
 			return nil, err
@@ -171,7 +183,11 @@ func Encode(c *Code, vfs ...ValidatorFunc) ([]byte, error) {
 		return nil, fmt.Errorf("mpm: failed to write PayloadFormatIndicator: %s", err)
 	}
 
-	if err := tlv.NewEncoder(w, tagName, []string{payloadFormatIndicatorID, crcID}, tlv.TagLengthTranslatorFunc(merchantAccountInformationTagLengthTranslator)).Encode(c); err != nil {
+	translatorFunc := chainTagLengthTranslators(
+		merchantAccountInformationTagLengthTranslator,
+		unreservedTemplatesTagLengthTranslator,
+	)
+	if err := tlv.NewEncoder(w, tagName, []string{payloadFormatIndicatorID, crcID}, translatorFunc).Encode(c); err != nil {
 		return nil, fmt.Errorf("mpm: failed to encode: %s", err)
 	}
 
@@ -222,15 +238,19 @@ func validateUnreservedTemplates(c *Code) error {
 	if len(c.UnreservedTemplates) == 0 {
 		return nil
 	}
-	var v struct {
-		GloballyUniqueIdentifier string `emv:"00"`
-	}
 	for _, t := range c.UnreservedTemplates {
-		if err := tlv.NewDecoder(strings.NewReader(t.Value), "emv", MaxSize, 2, 2, nil).Decode(&v); err != nil {
-			return NewInvalidFormat("mpm: value of UnreservedTemplates should be a valid TLV")
+		var v struct {
+			GloballyUniqueIdentifier string `emv:"00"`
 		}
-		if c.MerchantCity == "" || 32 < utf8.RuneCountInString(c.MerchantCity) {
-			return NewInvalidFormat("mpm: length of Globally Unique Identifier of UnreservedTemplates should be between 1 and 32")
+		if err := tlv.NewDecoder(strings.NewReader(t.Value), tagName, MaxSize, tagLength, lenLength, nil).Decode(&v); err != nil {
+			switch e := err.(type) {
+			case *tlv.MalformedPayloadError:
+				return NewInvalidFormat(fmt.Sprintf("mpm: %s", e.Error()))
+			}
+			return err
+		}
+		if v.GloballyUniqueIdentifier == "" || 32 < len(v.GloballyUniqueIdentifier) {
+			return NewInvalidFormat("mpm: length of tag 00 of UnreversedTemplate should be between 1 and 32")
 		}
 	}
 	return nil

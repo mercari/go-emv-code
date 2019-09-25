@@ -8,13 +8,13 @@ import (
 	"go.mercari.io/go-emv-code/tlv"
 )
 
-var emvSamplePayload = []byte("00020101021229300012D156000000000510A93FO3230Q31280012D15600000001030812345678520441115303156540523.725502015802CN5914BEST TRANSPORT6007BEIJING6233030412340603***0708A60086670902ME64200002ZH0104最佳运输0202北京6304CDE7")
+var emvSamplePayload = []byte("00020101021229300012D156000000000510A93FO3230Q31280012D15600000001030812345678520441115303156540523.725502015802CN5914BEST TRANSPORT6007BEIJING6233030412340603***0708A60086670902ME64200002ZH0104最佳运输0202北京8036003239401ff0c21a4543a8ed5fbaa30ab02e81360032c2fbf6dd646f4f36b617f10747c0b96163046F32")
+
+type invalidFormat interface {
+	InvalidFormat() bool
+}
 
 func TestDecoder_Decode(t *testing.T) {
-	type invalidFormat interface {
-		InvalidFormat() bool
-	}
-
 	type invalidCRC interface {
 		InvalidCRC() bool
 	}
@@ -59,12 +59,16 @@ func TestDecoder_Decode(t *testing.T) {
 					City:               "北京",
 					Valid:              true,
 				},
+				UnreservedTemplates: []tlv.TLV{
+					{Tag: "80", Length: "36", Value: "003239401ff0c21a4543a8ed5fbaa30ab02e"},
+					{Tag: "81", Length: "36", Value: "0032c2fbf6dd646f4f36b617f10747c0b961"},
+				},
 			},
 		},
 		{
 			name: "pass: without MerchantInformation",
 			args: args{
-				buf: []byte("00020101021229300012D156000000000510A93FO3230Q31280012D15600000001030812345678520441115802CN5914BEST TRANSPORT6007BEIJING540523.7253031565502016233030412340603***0708A60086670902ME91320016A0112233449988770708123456786304FF8B"),
+				buf: []byte("00020101021229300012D156000000000510A93FO3230Q31280012D15600000001030812345678520441115303156540523.725502015802CN5914BEST TRANSPORT6007BEIJING6233030412340603***0708A60086670902ME8036003239401ff0c21a4543a8ed5fbaa30ab02e81360032c2fbf6dd646f4f36b617f10747c0b9616304EBCA"),
 			},
 			want: &mpm.Code{
 				PayloadFormatIndicator:  "01",
@@ -85,6 +89,64 @@ func TestDecoder_Decode(t *testing.T) {
 				MerchantCity:                "BEIJING",
 				PostalCode:                  "",
 				AdditionalDataFieldTemplate: "030412340603***0708A60086670902ME",
+				UnreservedTemplates: []tlv.TLV{
+					{Tag: "80", Length: "36", Value: "003239401ff0c21a4543a8ed5fbaa30ab02e"},
+					{Tag: "81", Length: "36", Value: "0032c2fbf6dd646f4f36b617f10747c0b961"},
+				},
+			},
+		},
+		{
+			name: "pass: without UnreservedTemplates",
+			args: args{
+				buf: []byte("00020101021229300012D156000000000510A93FO3230Q31280012D15600000001030812345678520441115303156540523.725502015802CN5914BEST TRANSPORT6007BEIJING6233030412340603***0708A60086670902ME64200002ZH0104最佳运输0202北京6304CDE7"),
+			},
+			want: &mpm.Code{
+				PayloadFormatIndicator:  "01",
+				PointOfInitiationMethod: mpm.PointOfInitiationMethodDynamic,
+				MerchantAccountInformation: []tlv.TLV{
+					{Tag: "29", Length: "30", Value: "0012D156000000000510A93FO3230Q"},
+					{Tag: "31", Length: "28", Value: "0012D15600000001030812345678"},
+				},
+				MerchantCategoryCode: "4111",
+				TransactionCurrency:  "156",
+				TransactionAmount: mpm.NullString{
+					String: "23.72",
+					Valid:  true,
+				},
+				TipOrConvenienceIndicator:   mpm.TipOrConvenienceIndicatorPrompt,
+				CountryCode:                 "CN",
+				MerchantName:                "BEST TRANSPORT",
+				MerchantCity:                "BEIJING",
+				PostalCode:                  "",
+				AdditionalDataFieldTemplate: "030412340603***0708A60086670902ME",
+				MerchantInformation: mpm.NullMerchantInformation{
+					LanguagePreference: "ZH",
+					Name:               "最佳运输",
+					City:               "北京",
+					Valid:              true,
+				},
+			},
+		},
+		{
+			name: "err: GloballyUniqueIdentifier of UnreservedTemplate is empty",
+			args: args{
+				buf: []byte("00020101021229300012D156000000000510A93FO3230Q31280012D15600000001030812345678520441115303156540523.725502015802CN5914BEST TRANSPORT6007BEIJING6233030412340603***0708A60086670902ME64200002ZH0104最佳运输0202北京8000630484D1"),
+			},
+			wantErr: true,
+			wantErrTypeFunc: func(err error) bool {
+				e, ok := err.(invalidFormat)
+				return ok && e.InvalidFormat()
+			},
+		},
+		{
+			name: "err: GloballyUniqueIdentifier of UnreservedTemplate is greater than 32",
+			args: args{
+				buf: []byte("00020101021229300012D156000000000510A93FO3230Q31280012D15600000001030812345678520441115303156540523.725502015802CN5914BEST TRANSPORT6007BEIJING6233030412340603***0708A60086670902ME64200002ZH0104最佳运输0202北京8037003339401ff0c21a4543a8ed5fbaa30ab02ee6304D279"),
+			},
+			wantErr: true,
+			wantErrTypeFunc: func(err error) bool {
+				e, ok := err.(invalidFormat)
+				return ok && e.InvalidFormat()
 			},
 		},
 		{
@@ -207,6 +269,10 @@ func TestEncoder_Encode(t *testing.T) {
 						City:               "北京",
 						Valid:              true,
 					},
+					UnreservedTemplates: []tlv.TLV{
+						{Tag: "80", Length: "36", Value: "003239401ff0c21a4543a8ed5fbaa30ab02e"},
+						{Tag: "81", Length: "36", Value: "0032c2fbf6dd646f4f36b617f10747c0b961"},
+					},
 				},
 			},
 			want: emvSamplePayload,
@@ -233,9 +299,91 @@ func TestEncoder_Encode(t *testing.T) {
 					MerchantCity:                "BEIJING",
 					PostalCode:                  "",
 					AdditionalDataFieldTemplate: "030412340603***0708A60086670902ME",
+					UnreservedTemplates: []tlv.TLV{
+						{Tag: "80", Length: "36", Value: "003239401ff0c21a4543a8ed5fbaa30ab02e"},
+						{Tag: "81", Length: "36", Value: "0032c2fbf6dd646f4f36b617f10747c0b961"},
+					},
 				},
 			},
-			want: []byte("00020101021229300012D156000000000510A93FO3230Q31280012D15600000001030812345678520441115303156540523.725502015802CN5914BEST TRANSPORT6007BEIJING6233030412340603***0708A60086670902ME6304EBA6"),
+			want: []byte("00020101021229300012D156000000000510A93FO3230Q31280012D15600000001030812345678520441115303156540523.725502015802CN5914BEST TRANSPORT6007BEIJING6233030412340603***0708A60086670902ME8036003239401ff0c21a4543a8ed5fbaa30ab02e81360032c2fbf6dd646f4f36b617f10747c0b9616304EBCA"),
+		},
+		{
+			name: "err: err: GloballyUniqueIdentifier of UnreservedTemplate is empty",
+			args: args{
+				in: &mpm.Code{
+					PayloadFormatIndicator:  "01",
+					PointOfInitiationMethod: mpm.PointOfInitiationMethodDynamic,
+					MerchantAccountInformation: []tlv.TLV{
+						{Tag: "29", Length: "30", Value: "0012D156000000000510A93FO3230Q"},
+						{Tag: "31", Length: "28", Value: "0012D15600000001030812345678"},
+					},
+					MerchantCategoryCode: "4111",
+					TransactionCurrency:  "156",
+					TransactionAmount: mpm.NullString{
+						String: "23.72",
+						Valid:  true,
+					},
+					TipOrConvenienceIndicator:   mpm.TipOrConvenienceIndicatorPrompt,
+					CountryCode:                 "CN",
+					MerchantName:                "BEST TRANSPORT",
+					MerchantCity:                "BEIJING",
+					PostalCode:                  "",
+					AdditionalDataFieldTemplate: "030412340603***0708A60086670902ME",
+					MerchantInformation: mpm.NullMerchantInformation{
+						LanguagePreference: "ZH",
+						Name:               "最佳运输",
+						City:               "北京",
+						Valid:              true,
+					},
+					UnreservedTemplates: []tlv.TLV{
+						{Tag: "80", Length: "00", Value: ""},
+					},
+				},
+			},
+			wantErr: true,
+			wantErrTypeFunc: func(err error) bool {
+				e, ok := err.(invalidFormat)
+				return ok && e.InvalidFormat()
+			},
+		},
+		{
+			name: "err: GloballyUniqueIdentifier of UnreservedTemplate is greater than 32",
+			args: args{
+				in: &mpm.Code{
+					PayloadFormatIndicator:  "01",
+					PointOfInitiationMethod: mpm.PointOfInitiationMethodDynamic,
+					MerchantAccountInformation: []tlv.TLV{
+						{Tag: "29", Length: "30", Value: "0012D156000000000510A93FO3230Q"},
+						{Tag: "31", Length: "28", Value: "0012D15600000001030812345678"},
+					},
+					MerchantCategoryCode: "4111",
+					TransactionCurrency:  "156",
+					TransactionAmount: mpm.NullString{
+						String: "23.72",
+						Valid:  true,
+					},
+					TipOrConvenienceIndicator:   mpm.TipOrConvenienceIndicatorPrompt,
+					CountryCode:                 "CN",
+					MerchantName:                "BEST TRANSPORT",
+					MerchantCity:                "BEIJING",
+					PostalCode:                  "",
+					AdditionalDataFieldTemplate: "030412340603***0708A60086670902ME",
+					MerchantInformation: mpm.NullMerchantInformation{
+						LanguagePreference: "ZH",
+						Name:               "最佳运输",
+						City:               "北京",
+						Valid:              true,
+					},
+					UnreservedTemplates: []tlv.TLV{
+						{Tag: "80", Length: "37", Value: "003339401ff0c21a4543a8ed5fbaa30ab02e"},
+					},
+				},
+			},
+			wantErr: true,
+			wantErrTypeFunc: func(err error) bool {
+				e, ok := err.(invalidFormat)
+				return ok && e.InvalidFormat()
+			},
 		},
 		{
 			name:    "err: cannot pass nil pointer",

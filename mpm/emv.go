@@ -31,6 +31,7 @@ type Code struct {
 	AdditionalDataFieldTemplate     string                    `emv:"62"`
 	// CRC                             string  `emv:"63"` // The last object under the root. But useless for value.
 	MerchantInformation NullMerchantInformation `emv:"64"`
+	UnreservedTemplates []tlv.TLV               `emv:"UnreservedTemplates"`
 }
 
 const (
@@ -55,12 +56,33 @@ const (
 	merchantAccountInformationIDFrom  = 2
 	merchantAccountInformationIDTo    = 51
 	merchantAccountInformationTagName = "MerchantAccountInformation"
+
+	unreservedTemplatesIDFrom  = 80
+	unreservedTemplatesIDTo    = 99
+	unreservedTemplatesTagName = "UnreservedTemplates"
 )
+
+func chainTagLengthTranslators(f ...func(srcTagName, srcLength []rune) ([]rune, []rune)) tlv.TagLengthTranslator {
+	return tlv.TagLengthTranslatorFunc(func(tagName, length []rune) ([]rune, []rune) {
+		for _, f := range f {
+			tagName, length = f(tagName, length)
+		}
+		return tagName, length
+	})
+}
 
 func merchantAccountInformation(tag, length []rune) ([]rune, []rune) {
 	id, _ := strconv.Atoi(string(tag))
 	if (id >= merchantAccountInformationIDFrom) && (id <= merchantAccountInformationIDTo) {
 		return []rune(merchantAccountInformationTagName), length
+	}
+	return tag, length
+}
+
+func unreservedTemplates(tag, length []rune) ([]rune, []rune) {
+	id, _ := strconv.Atoi(string(tag))
+	if (id >= unreservedTemplatesIDFrom) && (id <= unreservedTemplatesIDTo) {
+		return []rune(unreservedTemplatesTagName), length
 	}
 	return tag, length
 }
@@ -89,7 +111,11 @@ func Decode(payload []byte, vfs ...ValidatorFunc) (*Code, error) {
 	}
 
 	var c Code
-	if err := tlv.NewDecoder(bytes.NewReader(payload), tagName, MaxSize, tagLength, lenLength, tlv.TagLengthTranslatorFunc(merchantAccountInformation)).Decode(&c); err != nil {
+	translatorFunc := chainTagLengthTranslators(
+		merchantAccountInformation,
+		unreservedTemplates,
+	)
+	if err := tlv.NewDecoder(bytes.NewReader(payload), tagName, MaxSize, tagLength, lenLength, translatorFunc).Decode(&c); err != nil {
 		switch e := err.(type) {
 		case *tlv.MalformedPayloadError:
 			return nil, NewInvalidFormat(fmt.Sprintf("mpm: %s", e.Error()))
@@ -102,6 +128,7 @@ func Decode(payload []byte, vfs ...ValidatorFunc) (*Code, error) {
 		validateMerchantName,
 		validateMerchantCity,
 		validateMerchantInformation,
+		validateUnreservedTemplates,
 	)
 	for _, f := range vfs {
 		if err := f(&c); err != nil {
@@ -120,13 +147,25 @@ func merchantAccountInformationTagLengthTranslator(tag, length []rune) ([]rune, 
 	return tag, length
 }
 
+func unreservedTemplatesTagLengthTranslator(tag, length []rune) ([]rune, []rune) {
+	if string(tag) == unreservedTemplatesTagName {
+		tag = []rune{}
+		length = []rune{}
+	}
+	return tag, length
+}
+
 // Encode encodes to EMV Payment Code payload.
 func Encode(c *Code, vfs ...ValidatorFunc) ([]byte, error) {
 	if c == nil {
 		return nil, errors.New("mpm: nil is not allowed")
 	}
 
-	vfs = append(vfs, validateMerchantInformation)
+	vfs = append(
+		vfs,
+		validateMerchantInformation,
+		validateUnreservedTemplates,
+	)
 	for _, f := range vfs {
 		if err := f(c); err != nil {
 			return nil, err
@@ -144,7 +183,11 @@ func Encode(c *Code, vfs ...ValidatorFunc) ([]byte, error) {
 		return nil, fmt.Errorf("mpm: failed to write PayloadFormatIndicator: %s", err)
 	}
 
-	if err := tlv.NewEncoder(w, tagName, []string{payloadFormatIndicatorID, crcID}, tlv.TagLengthTranslatorFunc(merchantAccountInformationTagLengthTranslator)).Encode(c); err != nil {
+	translatorFunc := chainTagLengthTranslators(
+		merchantAccountInformationTagLengthTranslator,
+		unreservedTemplatesTagLengthTranslator,
+	)
+	if err := tlv.NewEncoder(w, tagName, []string{payloadFormatIndicatorID, crcID}, translatorFunc).Encode(c); err != nil {
 		return nil, fmt.Errorf("mpm: failed to encode: %s", err)
 	}
 
@@ -187,6 +230,28 @@ func validateMerchantInformation(c *Code) error {
 	}
 	if 15 < utf8.RuneCountInString(c.MerchantInformation.City) {
 		return NewInvalidFormat("mpm: length of MerchantInformation.City should be less than 15")
+	}
+	return nil
+}
+
+func validateUnreservedTemplates(c *Code) error {
+	if len(c.UnreservedTemplates) == 0 {
+		return nil
+	}
+	for _, t := range c.UnreservedTemplates {
+		var v struct {
+			GloballyUniqueIdentifier string `emv:"00"`
+		}
+		if err := tlv.NewDecoder(strings.NewReader(t.Value), tagName, MaxSize, tagLength, lenLength, nil).Decode(&v); err != nil {
+			switch e := err.(type) {
+			case *tlv.MalformedPayloadError:
+				return NewInvalidFormat(fmt.Sprintf("mpm: %s", e.Error()))
+			}
+			return err
+		}
+		if v.GloballyUniqueIdentifier == "" || 32 < len(v.GloballyUniqueIdentifier) {
+			return NewInvalidFormat("mpm: length of tag 00 of UnreversedTemplate should be between 1 and 32")
+		}
 	}
 	return nil
 }

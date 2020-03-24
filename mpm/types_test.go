@@ -62,3 +62,53 @@ func TestTipOrConvenienceIndicator_Tokenize(t *testing.T) {
 		})
 	}
 }
+
+func TestTipOrConvenienceIndicator_Scan(t *testing.T) {
+	tests := []struct {
+		name    string
+		give    []rune
+		wantErr bool
+	}{
+		{
+			name:    "give nil",
+			give:    nil,
+			wantErr: true,
+		},
+		{
+			name:    "give empty",
+			give:    []rune{},
+			wantErr: true,
+		},
+		{
+			name:    "give unexpected string",
+			give:    []rune("wrong_value"),
+			wantErr: true,
+		},
+		{
+			name:    "give mpm.TipOrConvenienceIndicatorPrompt",
+			give:    []rune(mpm.TipOrConvenienceIndicatorPrompt),
+			wantErr: false,
+		},
+		{
+			name:    "give mpm.TipOrConvenienceIndicatorFixed",
+			give:    []rune(mpm.TipOrConvenienceIndicatorFixed),
+			wantErr: false,
+		},
+		{
+			name:    "give mpm.TipOrConvenienceIndicatorPercentage",
+			give:    []rune(mpm.TipOrConvenienceIndicatorPercentage),
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			var ind mpm.TipOrConvenienceIndicator
+			err := ind.Scan(tt.give)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("TipOrConvenienceIndicator.Scan error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

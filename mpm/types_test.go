@@ -205,3 +205,83 @@ func TestPointOfInitiationMethod_Scan(t *testing.T) {
 		})
 	}
 }
+
+func TestNullString_Tokenize(t *testing.T) {
+	tests := []struct {
+		name    string
+		give    *mpm.NullString
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "give nil",
+			give:    nil,
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name:    "give invalid mpm.NullString",
+			give:    &mpm.NullString{},
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name: "give invalid mpm.NullString",
+			give: &mpm.NullString{
+				String: "good_value",
+				Valid:  true,
+			},
+			want:    "good_value",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			dst, err := tt.give.Tokenize()
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NullString.Tokenize error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if tt.want != dst {
+				t.Errorf("NullString.Tokenize = %v, want %v", dst, tt.want)
+			}
+		})
+	}
+}
+
+func TestNullString_Scan(t *testing.T) {
+	tests := []struct {
+		name    string
+		give    []rune
+		wantErr bool
+	}{
+		{
+			name:    "give nil",
+			give:    nil,
+			wantErr: false,
+		},
+		{
+			name:    "give empty",
+			give:    []rune{},
+			wantErr: false,
+		},
+		{
+			name:    "give string",
+			give:    []rune("good_value"),
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			var ind mpm.NullString
+			err := ind.Scan(tt.give)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NullString.Scan error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

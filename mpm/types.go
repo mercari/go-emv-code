@@ -45,7 +45,7 @@ type PointOfInitiationMethod string
 
 const (
 	PointOfInitiationMethodStatic  PointOfInitiationMethod = "11"
-	PointOfInitiationMethodDynamic                         = "12"
+	PointOfInitiationMethodDynamic PointOfInitiationMethod = "12"
 )
 
 // Tokenize turns PointOfInitiationMethod into a string

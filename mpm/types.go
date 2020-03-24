@@ -96,8 +96,8 @@ type TipOrConvenienceIndicator string
 
 const (
 	TipOrConvenienceIndicatorPrompt     TipOrConvenienceIndicator = "01"
-	TipOrConvenienceIndicatorFixed                                = "02"
-	TipOrConvenienceIndicatorPercentage                           = "03"
+	TipOrConvenienceIndicatorFixed      TipOrConvenienceIndicator = "02"
+	TipOrConvenienceIndicatorPercentage TipOrConvenienceIndicator = "03"
 )
 
 // Tokenize turns TipOrConvenienceIndicator into a string

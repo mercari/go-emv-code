@@ -285,3 +285,97 @@ func TestNullString_Scan(t *testing.T) {
 		})
 	}
 }
+
+func TestNullMerchantInformation_Tokenize(t *testing.T) {
+	tests := []struct {
+		name    string
+		give    *mpm.NullMerchantInformation
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "give nil",
+			give:    nil,
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name:    "give invalid mpm.NullString",
+			give:    &mpm.NullMerchantInformation{},
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name: "give empty mpm.NullString",
+			give: &mpm.NullMerchantInformation{
+				Valid: true,
+			},
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name: "give valid mpm.NullString",
+			give: &mpm.NullMerchantInformation{
+				LanguagePreference: "ZH",
+				Name:               "最佳运输",
+				City:               "北京",
+				Valid:              true,
+			},
+			want:    "0002ZH0104最佳运输0202北京",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			dst, err := tt.give.Tokenize()
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NullMerchantInformation.Tokenize error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if tt.want != dst {
+				t.Errorf("NullMerchantInformation.Tokenize = %v, want %v", dst, tt.want)
+			}
+		})
+	}
+}
+
+func TestNullMerchantInformation_Scan(t *testing.T) {
+	tests := []struct {
+		name    string
+		give    []rune
+		wantErr bool
+	}{
+		{
+			name:    "give nil",
+			give:    nil,
+			wantErr: false,
+		},
+		{
+			name:    "give empty",
+			give:    []rune{},
+			wantErr: false,
+		}, {
+			name:    "give wrong string",
+			give:    []rune("wrong_value"),
+			wantErr: true,
+		},
+		{
+			name:    "give string",
+			give:    []rune("0202北京"),
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			var ind mpm.NullMerchantInformation
+			err := ind.Scan(tt.give)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NullMerchantInformation.Scan error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

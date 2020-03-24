@@ -7,7 +7,7 @@ require (
 	github.com/kisielk/errcheck v1.2.0
 	github.com/reviewdog/reviewdog v0.9.12
 	golang.org/x/lint v0.0.0-20190409202823-959b441ac422
-	golang.org/x/tools v0.0.0-20190918214516-5a1a30219888 // indirect
+	golang.org/x/tools v0.0.0-20190918214516-5a1a30219888
 	gotest.tools/gotestsum v0.3.5
 	honnef.co/go/tools v0.0.0-2019.2.1
 )

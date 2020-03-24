@@ -118,6 +118,7 @@ func (t *TipOrConvenienceIndicator) Scan(token []rune) error {
 		return nil
 	case TipOrConvenienceIndicatorPercentage:
 		*t = TipOrConvenienceIndicatorPercentage
+		return nil
 	}
 	return fmt.Errorf("passed value is invalid for TipOrConvenienceIndicator: %v", token)
 }

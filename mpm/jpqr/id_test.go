@@ -112,6 +112,86 @@ func TestParseID(t *testing.T) {
 	}
 }
 
+func TestParseIDFromString(t *testing.T) {
+	type args struct {
+		src string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *jpqr.ID
+		wantErr bool
+	}{
+		{
+			args: args{
+				src: "0019jp.or.paymentsjapan011300000000000010204000103060000010406000001",
+			},
+			want: &jpqr.ID{Prefix: "jp.or.paymentsjapan", LV1: "0000000000001", LV2: "0001", LV3: "000001", LV4: "000001"},
+		},
+		{
+			name: "fail: malformed payload",
+			args: args{
+				src: "foobarbaz",
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail: empty src is err",
+			args: args{
+				src: "",
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail: invalid prefix",
+			args: args{
+				src: "0019jp.co.paymentsjapan011300000000000010204000103060000010406000001",
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail: invalid length (LV1)",
+			args: args{
+				src: "0019jp.or.paymentsjapan01130000000000001020300003060000010406000001",
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail: invalid length (LV2)",
+			args: args{
+				src: "0019jp.or.paymentsjapan01130000000000001020300003060000010406000001",
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail: invalid length (LV3)",
+			args: args{
+				src: "0019jp.or.paymentsjapan01130000000000001020400010305000000406000001",
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail: invalid length (LV4)",
+			args: args{
+				src: "0019jp.or.paymentsjapan01130000000000001020400010306000001040500000",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := jpqr.ParseIDFromString(tt.args.src)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("ParseIDFromString() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ParseIDFromString() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestID_String(t *testing.T) {
 	type fields struct {
 		Prefix string

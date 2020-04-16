@@ -57,7 +57,7 @@ func validateIDLength(i *ID) error {
 	return nil
 }
 
-// ParseID validates and parses given string as JPQR-ID.
+// ParseID validates and parses given *mpm.Code as JPQR-ID.
 func ParseID(c *mpm.Code) (*ID, error) {
 	for _, v := range c.MerchantAccountInformation {
 		var id ID
@@ -72,4 +72,13 @@ func ParseID(c *mpm.Code) (*ID, error) {
 		}
 	}
 	return nil, errors.New("missing JPQR-ID")
+}
+
+// ParseIDFromString validates and parses given string as JPQR-ID.
+func ParseIDFromString(v string) (*ID, error) {
+	return ParseID(&mpm.Code{
+		MerchantAccountInformation: []tlv.TLV{
+			{Tag: "26", Length: "68", Value: v},
+		},
+	})
 }

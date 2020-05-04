@@ -13,6 +13,9 @@ REVIEWDOG_ARG ?= -diff="git diff master"
 
 LINT_TOOLS=$(shell cat tools/tools.go | egrep '^\s_ '  | awk '{ print $$2 }')
 
+GOPATH := $(shell go env GOPATH)
+GOBIN ?= $(GOPATH)/bin
+
 .PHONY: all
 all: test
 

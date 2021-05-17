@@ -1,9 +1,7 @@
-# go-emv-code [![CircleCI][circleci-badge]][circleci] [![codecov][codecov-badge]][codecov] [![GoDoc][godoc-badge]][godoc] [![Go Report Card][goreport-badge]][goreport]
+# go-emv-code [![CircleCI][circleci-badge]][circleci] [![GoDoc][godoc-badge]][godoc] [![Go Report Card][goreport-badge]][goreport]
 
 [circleci]: https://circleci.com/gh/mercari/go-emv-code/tree/master
 [circleci-badge]: https://circleci.com/gh/mercari/go-emv-code/tree/master.svg?style=svg
-[codecov]: https://codecov.io/gh/mercari/go-emv-code
-[codecov-badge]: https://codecov.io/gh/mercari/go-emv-code/branch/master/graph/badge.svg
 [godoc]: https://godoc.org/go.mercari.io/go-emv-code
 [godoc-badge]: https://godoc.org/go.mercari.io/go-emv-code?status.svg
 [goreport]: https://goreportcard.com/report/go.mercari.io/go-emv-code

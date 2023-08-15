@@ -84,6 +84,9 @@ func (d *Decoder) Decode(dst interface{}) error {
 
 func readChunk(r io.RuneReader, b []rune, tagLength, lenLength int) (n int, err error) {
 	// read Tag
+	if len(b) < n+tagLength {
+		return n, &MalformedPayloadError{msg: "cannot read tag"}
+	}
 	nn, err := readRunes(r, b[:tagLength], tagLength)
 	if err != nil {
 		return
@@ -91,6 +94,9 @@ func readChunk(r io.RuneReader, b []rune, tagLength, lenLength int) (n int, err 
 	n += nn
 
 	// read Length
+	if len(b) < n+lenLength {
+		return n, &MalformedPayloadError{msg: "cannot read value length"}
+	}
 	nn, err = readRunes(r, b[n:n+lenLength], lenLength)
 	if err != nil {
 		return
@@ -101,10 +107,10 @@ func readChunk(r io.RuneReader, b []rune, tagLength, lenLength int) (n int, err 
 	}
 	n += nn
 
-	if len(b) < n+length {
-		return n, &MalformedPayloadError{msg: "too long value length"}
-	}
 	// read Value
+	if len(b) < n+length {
+		return n, &MalformedPayloadError{msg: "cannot read value"}
+	}
 	nn, err = readRunes(r, b[n:n+length], length)
 	if err != nil {
 		return

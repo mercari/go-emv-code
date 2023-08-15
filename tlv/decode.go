@@ -101,6 +101,9 @@ func readChunk(r io.RuneReader, b []rune, tagLength, lenLength int) (n int, err 
 	}
 	n += nn
 
+	if len(b) < n+length {
+		return n, &MalformedPayloadError{msg: "too long value length"}
+	}
 	// read Value
 	nn, err = readRunes(r, b[n:n+length], length)
 	if err != nil {

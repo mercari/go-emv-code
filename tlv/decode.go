@@ -117,6 +117,10 @@ func readChunk(r io.RuneReader, b []rune, tagLength, lenLength int) (n int, err 
 	}
 	n += nn
 
+	if len(b) < n+tagLength {
+		return n, io.EOF
+	}
+
 	return
 }
 

@@ -56,7 +56,7 @@ func TestTlvDecode(t *testing.T) {
 			err := NewDecoder(strings.NewReader(tt.args.payload), "emv", tt.args.bufSize, 2, 2, nil).Decode(&v)
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Decoer.Decode() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Decoder.Decode() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

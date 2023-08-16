@@ -2,9 +2,6 @@ export GO111MODULE = on
 
 REPOSITORY = go.mercari.io/go-emv-code
 PACKAGES ?= $(shell go list ./...)
-ifneq ($(CIRCLECI),)
-	PACKAGES=$(shell go list ./... | circleci tests split)
-endif
 
 GO_TEST ?= go test
 GO_TEST_TARGET ?= .

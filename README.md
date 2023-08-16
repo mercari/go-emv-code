@@ -1,7 +1,7 @@
-# go-emv-code [![CircleCI][circleci-badge]][circleci] [![GoDoc][godoc-badge]][godoc] [![Go Report Card][goreport-badge]][goreport]
+# go-emv-code [![GitHub Actions][gh-actions-badge]][gh-actions] [![GoDoc][godoc-badge]][godoc] [![Go Report Card][goreport-badge]][goreport]
 
-[circleci]: https://circleci.com/gh/mercari/go-emv-code/tree/master
-[circleci-badge]: https://circleci.com/gh/mercari/go-emv-code/tree/master.svg?style=svg
+[gh-actions]: https://github.com/mercari/go-emv-code/actions/workflows/main.yml
+[gh-actions-badge]: https://github.com/mercari/go-emv-code/actions/workflows/main.yml/badge.svg
 [godoc]: https://godoc.org/go.mercari.io/go-emv-code
 [godoc-badge]: https://godoc.org/go.mercari.io/go-emv-code?status.svg
 [goreport]: https://goreportcard.com/report/go.mercari.io/go-emv-code
@@ -29,21 +29,15 @@ https://www.mercari.com/cla/
 * requirements
     * Go version must be at least 1.12 (Modules)
 
-1. Testing in local
+Testing in local
 
 ```
 $ make test
 ```
 
-2. Testing with [Circle CI CLI](https://circleci.com/docs/2.0/local-jobs/)
-
-```
-$ circleci build --job test
-```
-
 ## License
 
-Copyright 2019 Mercari, Inc.
+Copyright 2019-2023 Mercari, Inc.
 
 Licensed under the MIT License.
 

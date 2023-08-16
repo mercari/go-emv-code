@@ -18,7 +18,7 @@ func TestTlvDecode(t *testing.T) {
 		{
 			name: "read tag error",
 			args: args{
-				payload: "0001a",
+				payload: "003239401ff0c21a4543a8ed5fbaa30ab02e",
 				bufSize: 1,
 			},
 			wantErr: true,
@@ -26,7 +26,7 @@ func TestTlvDecode(t *testing.T) {
 		{
 			name: "read length error",
 			args: args{
-				payload: "0001a",
+				payload: "003239401ff0c21a4543a8ed5fbaa30ab02e",
 				bufSize: 3,
 			},
 			wantErr: true,
@@ -34,7 +34,7 @@ func TestTlvDecode(t *testing.T) {
 		{
 			name: "read value error",
 			args: args{
-				payload: "0001a",
+				payload: "003239401ff0c21a4543a8ed5fbaa30ab02e",
 				bufSize: 4,
 			},
 			wantErr: true,
@@ -42,8 +42,8 @@ func TestTlvDecode(t *testing.T) {
 		{
 			name: "pass",
 			args: args{
-				payload: "0001a",
-				bufSize: 5,
+				payload: "003239401ff0c21a4543a8ed5fbaa30ab02e",
+				bufSize: 36,
 			},
 			wantErr: false,
 		},

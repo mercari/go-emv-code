@@ -6,8 +6,6 @@ PACKAGES ?= $(shell go list ./...)
 GO_TEST ?= go test
 GO_TEST_TARGET ?= .
 
-REVIEWDOG_ARG ?= -diff="git diff master"
-
 LINT_TOOLS=$(shell cat tools/tools.go | egrep '^\s_ '  | awk '{ print $$2 }')
 
 GOPATH := $(shell go env GOPATH)
@@ -25,13 +23,14 @@ bootstrap-lint-tools:
 test:  ## Run go test
 	${GO_TEST} -v -race -mod=readonly -run=$(GO_TEST_TARGET) $(PACKAGES)
 
+.PHONY: lint
+lint: bootstrap-lint-tools ## Run lint tools
+	go vet ./...
+	staticcheck ./...
+
 .PHONY: coverage
 coverage:  ## Collect test coverage
 	${GO_TEST} -v -race -mod=readonly -run=$(GO_TEST_TARGET) -covermode=atomic -coverpkg=${REPOSITORY}/... -coverprofile=$@.out $(PACKAGES)
-
-.PHONY: reviewdog
-reviewdog: bootstrap-lint-tools  ## Run reviewdog
-	reviewdog -conf=.reviewdog.yml $(REVIEWDOG_ARG)
 
 .PHONY: help
 help:  ## Show this help

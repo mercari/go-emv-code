@@ -26,7 +26,7 @@ jobs:
       - name: Run test
         run: |
           make test
-  reviewdog:
+  lint:
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -45,6 +45,6 @@ jobs:
         if: ${{ steps.setup-go.outputs.cache-hit != 'true' }}
         run: |
           go mod download
-      - name: Run reviewdog
+      - name: Run lint tools
         run: |
-          make reviewdog
+          make lint

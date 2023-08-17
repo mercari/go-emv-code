@@ -1,0 +1,50 @@
+name: main
+on:
+  push:
+    branches:
+      - '**'
+jobs:
+  test:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -eu -o pipefail {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup go
+        id: setup-go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: "go.mod"
+      - name: Download dependencies
+        if: ${{ steps.setup-go.outputs.cache-hit != 'true' }}
+        run: |
+          go mod download
+      - name: Run test
+        run: |
+          make test
+  lint:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -eu -o pipefail {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup go
+        id: setup-go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: "go.mod"
+      - name: Download dependencies
+        if: ${{ steps.setup-go.outputs.cache-hit != 'true' }}
+        run: |
+          go mod download
+      - name: Run lint tools
+        run: |
+          make lint

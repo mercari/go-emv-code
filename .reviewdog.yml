@@ -1,13 +1,7 @@
 runner:
   # https://golang.org/cmd/vet/
   govet:
-    cmd: go vet $(go list ./...)
-
-  # https://github.com/golang/lint
-  golint:
-    cmd: golint $(go list ./...)
-    errorformat:
-    - "%f:%l:%c: %m"
+    format: govet
 
   # https://github.com/client9/misspell
   misspell:
@@ -17,7 +11,7 @@ runner:
 
   # https://github.com/kisielk/errcheck
   errcheck:
-    cmd: errcheck -exclude .errcheck_excludes  -ignore 'fmt:.*,io:.*,ioutil:.*,net/http:.*' -ignoretests $(go list ./...)
+    cmd: errcheck -ignore 'fmt:.*,io:.*,ioutil:.*,net/http:.*' -ignoretests $(go list ./...)
     errorformat:
     - "%f:%l:%c:%m"
 

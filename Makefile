@@ -2,14 +2,9 @@ export GO111MODULE = on
 
 REPOSITORY = go.mercari.io/go-emv-code
 PACKAGES ?= $(shell go list ./...)
-ifneq ($(CIRCLECI),)
-	PACKAGES=$(shell go list ./... | circleci tests split)
-endif
 
 GO_TEST ?= go test
 GO_TEST_TARGET ?= .
-
-REVIEWDOG_ARG ?= -diff="git diff master"
 
 LINT_TOOLS=$(shell cat tools/tools.go | egrep '^\s_ '  | awk '{ print $$2 }')
 
@@ -28,13 +23,14 @@ bootstrap-lint-tools:
 test:  ## Run go test
 	${GO_TEST} -v -race -mod=readonly -run=$(GO_TEST_TARGET) $(PACKAGES)
 
+.PHONY: lint
+lint: bootstrap-lint-tools ## Run lint tools
+	go vet ./...
+	staticcheck ./...
+
 .PHONY: coverage
 coverage:  ## Collect test coverage
 	${GO_TEST} -v -race -mod=readonly -run=$(GO_TEST_TARGET) -covermode=atomic -coverpkg=${REPOSITORY}/... -coverprofile=$@.out $(PACKAGES)
-
-.PHONY: reviewdog
-reviewdog: bootstrap-lint-tools  ## Run reviewdog
-	reviewdog -conf=.reviewdog.yml $(REVIEWDOG_ARG)
 
 .PHONY: help
 help:  ## Show this help

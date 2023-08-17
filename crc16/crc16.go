@@ -82,7 +82,7 @@ func (d *digest) Sum16() uint16 { return d.crc }
 
 func (d *digest) Sum(in []byte) []byte {
 	s := d.Sum16()
-	return append(in, byte(s>>16), byte(s>>8), byte(s))
+	return append(in, 0, byte(s>>8), byte(s))
 }
 
 // Hash16 is the common interface implemented by all 16-bit hash functions.
